@@ -1,0 +1,861 @@
+/* =========================================
+   VENTANA MODAL DEL POKÉMON DETALLADO
+   ========================================= */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Por encima del Navbar */
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh; /* Si es muy alto, no se saldrá de la pantalla */
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.close-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* 🧬 ESTRUCTURA INTERNA */
+.modal-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .modal-body {
+    grid-template-columns: 1fr 1fr; /* Mitad imagen, mitad datos */
+  }
+}
+
+/* Zona de Imagen */
+.modal-image-container {
+  background-color: #f8fafc;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.modal-image-container img {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+}
+
+/* Zona de Datos */
+.modal-header {
+  margin-bottom: 1.5rem;
+}
+
+.modal-id {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.modal-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  text-transform: capitalize;
+}
+
+.modal-description {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+/* 📊 ESTADÍSTICAS BARRAS */
+.stats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 100px 40px 1fr;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.stat-name {
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #1e293b;
+  text-align: right;
+}
+
+.stat-bar-bg {
+  width: 100%;
+  background-color: #f1f5f9;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  /* Colores según la estadística para darle vida */
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+/* =========================================
+   🗂️ PESTAÑAS (TABS)
+   ========================================= */
+.modal-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: #1e293b;
+  background-color: #f8fafc;
+}
+
+.tab-btn.active {
+  color: #e3350d;
+  background-color: #fef2f2;
+}
+
+/* Contenido de Evoluciones */
+.evolution-chain {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.evo-step {
+  background: #f1f5f9;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #1e293b;
+}
+
+.evo-arrow {
+  color: #94a3b8;
+  font-weight: bold;
+}
+
+/* Contenido de Movimientos */
+.moves-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto; /* Scroll interno solo para los movimientos */
+  padding-right: 0.5rem;
+}
+
+.move-badge {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  color: #475569;
+}
+
+/* Contenedor de la cadena evolutiva */
+.evo-chain-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+/* Tarjeta individual de cada Pokémon en la evolución */
+.evo-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.evo-pixel-sprite {
+  width: 96px; /* Tamaño estándar de los sprites clásicos */
+  height: 96px;
+  object-fit: contain;
+  /* ✨ EL TRUCO PARA EL PIXEL ART ✨ */
+  image-rendering: pixelated; 
+  image-rendering: crisp-edges;
+  transition: transform 0.2s;
+}
+
+.evo-pixel-sprite:hover {
+  transform: scale(1.1);
+}
+
+.evo-name {
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: capitalize;
+  color: #334155;
+  margin-top: 5px;
+}
+
+/* El conector con el método (La flecha y el texto) */
+.evo-arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.evo-method-text {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  border: 1px solid #e2e8f0;
+}
+
+.evo-arrow-icon {
+  font-size: 1.5rem;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+/* --- EL ENVOLTORIO INVISIBLE --- 
+   Ahora usa Flexbox para poner flecha-tarjeta-flecha en línea recta */
+.modal-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px; /* ⬅️ ESTA ES LA CLAVE: Separación exacta entre tarjeta y botones */
+  width: 100%;
+  max-width: 1100px; /* Un poco más ancho para que quepa todo */
+  padding: 0 20px; /* Margen de seguridad para que no toque los bordes del monitor */
+}
+
+/* --- LA TARJETA BLANCA --- */
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 850px; /* Ancho máximo de la tarjeta */
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  max-height: 90vh; /* Que no sea más alta que la pantalla */
+  overflow-y: auto; /* Si el contenido es muy largo, se puede hacer scroll dentro */
+}
+
+/* El interior de la tarjeta */
+.modal-body {
+  display: flex;
+  padding: 50px; /* Más aire por dentro para que respire el diseño */
+  gap: 50px; /* Separación entre la foto de la izquierda y la info de la derecha */
+  align-items: flex-start; /* Para que la imagen no se estire si hay mucho texto */
+}
+
+/* --- BOTONES CIRCULARES --- */
+.floating-arrow {
+  flex-shrink: 0; /* Impide que la tarjeta aplaste los botones */
+  width: 60px; /* Un tamaño generoso para hacer clic cómodamente */
+  height: 60px;
+  border-radius: 50%;
+  background-color: white;
+  color: #475569; /* Gris oscuro elegante */
+  border: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Sombra suave */
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Efecto al pasar el ratón */
+.floating-arrow:hover {
+  transform: scale(1.15); /* Crece hacia ti */
+  background-color: #f8fafc;
+  color: #0f172a;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25); /* Sombra más grande al flotar */
+}
+
+/* Efecto al hacer clic */
+.floating-arrow:active {
+  transform: scale(0.95);
+}
+
+/* --- RESPONSIVE: MÓVILES Y PANTALLAS PEQUEÑAS --- */
+@media (max-width: 900px) {
+  .modal-wrapper {
+    position: relative; /* Volvemos al truco absoluto solo en móviles */
+    gap: 0;
+    padding: 0 10px;
+  }
+  
+  .modal-body {
+    flex-direction: column; /* Foto arriba, info abajo */
+    padding: 30px 20px;
+    gap: 30px;
+  }
+
+  /* En móvil no hay sitio a los lados, los metemos un poco encima de la tarjeta */
+  .floating-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+    z-index: 100;
+  }
+  
+  .floating-arrow:hover {
+    transform: translateY(-50%) scale(1.1); /* Mantiene el centrado vertical */
+  }
+
+  .floating-arrow.left { left: 5px; }
+  .floating-arrow.right { right: 5px; }
+}
+
+/* =========================================
+   🧬 PESTAÑA: EVOLUCIONES
+   ========================================= */
+
+.evo-chain-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap; /* Si la cadena es muy larga, pasa a la línea de abajo */
+  gap: 15px;
+  padding: 30px 0;
+  width: 100%;
+}
+
+/* El contenedor de cada Pokémon en la cadena */
+.evo-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  border-radius: 15px;
+  transition: all 0.2s ease;
+}
+
+/* Efecto al pasar el ratón por encima (indica que es clicable) */
+.evo-step:hover {
+  background-color: #f1f5f9;
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.evo-step:active {
+  transform: translateY(0);
+}
+
+/* La imagen de la evolución */
+.evo-pixel-sprite {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  image-rendering: pixelated; /* Mantiene el estilo retro/pixel art nítido */
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+.evo-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #334155;
+  text-transform: capitalize;
+  margin-top: 10px;
+}
+
+/* La flecha y el método de evolución */
+.evo-arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  min-width: 80px;
+}
+
+.evo-method-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 5px;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+.evo-arrow-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto; 
+  padding: 30px 20px 0 20px; /* ⬅️ 30px de relleno extra por dentro en la parte superior */
+}
+
+/* Dividimos el pie en 3 partes iguales para que el centro siempre sea exacto */
+.footer-section {
+  flex: 1;
+  display: flex;
+}
+
+/* Alineaciones individuales */
+.footer-section.left {
+  justify-content: flex-start;
+}
+
+.footer-section.center {
+  justify-content: center;
+}
+
+.footer-section.right {
+  justify-content: flex-end;
+}
+
+/* Estilos de los controles de Mostrar */
+.limit-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.limit-select-small {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  color: #334155;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Estilo del botón de Volver Arriba */
+.scroll-top-btn {
+  padding: 10px 20px;
+  background-color: #475569;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scroll-top-btn:hover {
+  background-color: #334155;
+  transform: translateY(-2px);
+}
+
+.scroll-top-btn:active {
+  transform: translateY(0);
+}
+
+/* --- RESPONSIVE: Adaptación para móviles --- */
+@media (max-width: 800px) {
+  .pagination-container {
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .footer-section {
+    width: 100%;
+    justify-content: center !important; /* En móvil centramos TODO */
+  }
+
+  .scroll-top-btn {
+    width: 100%; /* El botón ocupa todo el ancho para ser fácil de pulsar */
+    padding: 15px;
+  }
+}
+
+/* --- CONTENEDOR DE LA TABLA MOVIMIENTOS --- */
+.moves-section {
+  margin-top: 1.5rem;
+}
+
+.moves-wrapper {
+  max-height: 380px; /* Altura fija para activar el scroll */
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.moves-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+}
+
+/* --- CABECERA (Sticky) --- */
+.moves-table th {
+  position: sticky;
+  top: 0;
+  background: #1e293b; /* Color oscuro profesional */
+  color: #f8fafc;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  z-index: 10;
+}
+
+.th-left {
+  text-align: left !important;
+  padding-left: 20px !important;
+}
+
+/* --- FILAS Y CELDAS --- */
+.move-row td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.move-row:hover {
+  background-color: #f8fafc;
+}
+
+.move-name-cell {
+  text-align: left !important;
+  padding-left: 20px !important;
+}
+
+.move-name {
+  font-weight: 700;
+  color: #334155;
+  text-transform: capitalize;
+}
+
+/* --- COLUMNAS DE STATS --- */
+.move-stat {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* --- CATEGORÍAS (Físico, Especial, Estado) --- */
+.move-class-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.class-text-small {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+  min-width: 75px;
+  text-align: center;
+}
+
+.category-physical {
+  background-color: #ffeaa7;
+  color: #d35400;
+  border: 1px solid #fab1a0;
+}
+
+.category-special {
+  background-color: #dff9fb;
+  color: #130f40;
+  border: 1px solid #c7ecee;
+}
+
+.category-status {
+  background-color: #f1f2f6;
+  color: #57606f;
+  border: 1px solid #dfe4ea;
+}
+
+/* --- ICONOS DE CATEGORÍA (Si decides usarlos) --- */
+.move-class-icon {
+  width: 24px;
+  height: auto;
+  margin-right: 6px;
+}
+
+/* --- PERSONALIZACIÓN DEL SCROLLBAR --- */
+.moves-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.moves-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.moves-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.moves-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* --- ESTADO DE CARGA --- */
+.move-row-loading td {
+  padding: 20px;
+  color: #94a3b8;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Contenedor de movimientos dentro de la columna derecha */
+.moves-section {
+  margin-top: 10px;
+}
+
+.table-wrapper {
+  max-height: 280px; /* Ajusta esto para que no estire la card */
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.moves-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem; /* Letra pequeña para que quepa todo */
+}
+
+.moves-table th {
+  position: sticky;
+  top: 0;
+  background: #acabab;
+  color: #000000;
+  padding: 8px;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  border-bottom: 1px solid #eee;
+  z-index: 1;
+}
+
+.moves-table td {
+  padding: 8px 4px;
+  border-bottom: 1px solid #fdfdfd;
+  text-align: center;
+}
+
+/* Nombre del movimiento alineado a la izquierda */
+.move-name-cell {
+  text-align: left !important;
+  padding-left: 10px !important;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Estilo para los números (Potencia y PP) */
+.move-stat {
+  color: #666;
+  font-weight: 500;
+}
+
+/* Scrollbar minimalista para que no "abulte" */
+.table-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
+/* --- CONTENEDOR DE LA TABLA MOVIMIENTOS --- */
+/* Contenedor principal de la cadena */
+.evo-chain-container {
+  display: flex;
+  flex-wrap: wrap; /* Por si son muchas, que bajen */
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.evo-item-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* El cuadro del Pokémon */
+.evo-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.evo-step:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-3px);
+}
+
+/* Caja del Sprite (estilo miniatura) */
+.evo-sprite-box {
+  width: 70px; /* Un pelín más grandes para que se aprecie el arte */
+  height: 70px;
+  background: radial-gradient(circle, #ffffff 0%, #f0f0f0 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.evo-pixel-sprite {
+  width: 55px;
+  height: 55px;
+  /* IMPORTANTE: Quitamos el pixelated para que no se vea borroso el dibujo */
+  image-rendering: auto; 
+  object-fit: contain;
+}
+
+.evo-step:hover .evo-sprite-box {
+  border-color: #3b82f6; /* Color azul al pasar el ratón */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.evo-name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: #444;
+}
+
+/* La flecha y el método */
+.evo-arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.evo-method-text {
+  font-size: 0.6rem;
+  color: #999;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: -5px;
+}
+
+.evo-arrow-icon {
+  color: #ccc;
+  font-size: 1.2rem;
+}
+
+/* Ajuste para que no se vea gigante en la modal-info */
+.tab-content {
+  max-width: 100%;
+  overflow: hidden;
+}

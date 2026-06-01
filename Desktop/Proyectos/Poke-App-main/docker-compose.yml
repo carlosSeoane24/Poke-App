@@ -1,0 +1,23 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: pokemon_db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongo_data:/data/db
+  
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      # ⬇️ EL CAMBIO ESTÁ AQUÍ: Una sola URL con usuario:contraseña@servidor:puerto
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongodb:27017/
+
+volumes:
+  mongo_data:
